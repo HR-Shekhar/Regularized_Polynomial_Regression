@@ -19,21 +19,22 @@ material_metric = st.number_input("Material Transformation Metric", min_value=0.
 
 # Predict button
 if st.button("Compare Models"):
-    # Prepare input as in training
-    x_input = np.array([[temperature * pressure, material_metric]])
+    # Original input for sklearn model
+    x_raw = np.array([[temperature, pressure, material_metric]])
 
-    # Scratch model prediction
+    # Scratch model input (manually computed feature)
+    x_scratch_input = np.array([[temperature * pressure, material_metric]])
     poly_scratch = scratch_model['poly']
     scaler_scratch = scratch_model['scaler']
     w = scratch_model['w']
     b = scratch_model['b']
 
-    x_scaled_scratch = scaler_scratch.transform(x_input)
+    x_scaled_scratch = scaler_scratch.transform(x_scratch_input)
     x_poly_scratch = poly_scratch.transform(x_scaled_scratch)
     pred_scratch = np.dot(x_poly_scratch, w) + b
 
     # Sklearn model prediction
-    pred_sklearn = sklearn_model.predict(x_input)
+    pred_sklearn = sklearn_model.predict(x_raw)
 
     # Prepare comparison dataframe
     df_compare = pd.DataFrame({
