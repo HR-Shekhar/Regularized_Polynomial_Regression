@@ -10,7 +10,7 @@ sklearn_model = joblib.load("PolySklearn.pkl")
 
 # Streamlit UI
 st.title("🧪 Model Comparison: Scratch vs Scikit-learn")
-st.subheader("This model predicts the product quality on the basis of features like Temperature, Pressure and Material Transformation Metrics")
+st.subheader("📦 This model predicts the product quality on the basis of features like Temperature, Pressure and Material Transformation Metrics")
 st.markdown("Compare predictions from a manually built polynomial regression model and a scikit-learn model.")
 
 # Input fields
