@@ -1,44 +1,46 @@
 import streamlit as st
 import numpy as np
-import pickle
+from joblib import load
 
-# Load both models
-with open("PolyFromScratch.pkl", "rb") as f:
-    weights = pickle.load(f)
+# Load models
+ridge_model = load("PolyFromScratch.joblib")   # from-scratch model
+sklearn_model = load("PolySklearn.joblib")     # sklearn pipeline
 
-with open("PolySklearn.pkl", "rb") as f:
-    sklearn_model = pickle.load(f)
-
-# Scratch model prediction function
-def predict_scratch(x, weights):
-    x = np.insert(x, 0, 1, axis=1)  # Add bias term
-    return x @ weights
+# Prediction function for from-scratch model
+def predict_scratch(X, model):
+    X_scaled = model["scaler"].transform(X)
+    w = model["w"]
+    b = model["b"]
+    return np.dot(X_scaled, w) + b
 
 # Streamlit UI
-st.set_page_config(page_title="Polynomial Ridge Regression", layout="centered")
+st.set_page_config(page_title="Quality Rating Predictor", layout="centered")
+
 st.title("🔧 Quality Rating Prediction: Polynomial Ridge Regression")
 
-st.markdown("This app compares predictions of Polynomial Ridge Regression using:")
-st.markdown("- 🧠 Custom model (from scratch)")
-st.markdown("- 🤖 Scikit-learn pipeline")
+st.markdown("""
+Compare two models trained on:
+- 🧠 **Custom implementation** (from scratch)
+- 🤖 **Scikit-learn Ridge regression**
+""")
 
-st.header("🧪 Input Features")
-temperature = st.number_input("Temperature (°C)", value=210.0)
-pressure = st.number_input("Pressure (kPa)", value=8.0)
-transformation = st.number_input("Material Transformation Metric", value=9_000_000.0)
+# Inputs
+temp = st.number_input("🌡️ Temperature (°C)", value=200.0, step=0.1)
+pressure = st.number_input("⏱️ Pressure (kPa)", value=8.0, step=0.01)
 
-# Feature engineering
-temp_pressure = temperature * pressure
+if st.button("Predict Quality Rating"):
+    # Derived features
+    temp_x_pressure = temp * pressure
+    mat_trans = temp_x_pressure ** 2
 
-# Prepare input for prediction
-x = np.array([[temp_pressure, transformation]])
+    # Create input for prediction
+    X_input = np.array([[temp_x_pressure, mat_trans]])
 
-if st.button("Predict"):
-    pred_scratch = predict_scratch(x, weights)[0]
-    pred_sklearn = sklearn_model.predict(x)[0]
+    # Predict
+    pred_scratch = predict_scratch(X_input, ridge_model)
+    pred_sklearn = sklearn_model.predict(X_input)[0]
 
-    st.success(f"🧠 From Scratch Prediction: **{pred_scratch:.2f}**")
-    st.success(f"🤖 Scikit-learn Prediction: **{pred_sklearn:.2f}**")
-
-st.markdown("---")
-st.caption("Made by Himanshu Shekhar")
+    # Output
+    st.subheader("📈 Predictions")
+    st.success(f"🧠 From-Scratch Model: **{pred_scratch:.4f}**")
+    st.success(f"🤖 Scikit-learn Model: **{pred_sklearn:.4f}**")
