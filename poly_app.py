@@ -1,14 +1,16 @@
 import streamlit as st
 import numpy as np
 import joblib
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # Load models
 scratch_model = joblib.load("PolyFromScratch.pkl")
 sklearn_model = joblib.load("PolySklearn.pkl")
 
 # Streamlit UI
-st.title("Poly Regression Quality Predictor")
-st.markdown("Enter manufacturing conditions to predict quality rating.")
+st.title("🧪 Model Comparison: Scratch vs Scikit-learn")
+st.markdown("Compare predictions from a manually built polynomial regression model and a scikit-learn model.")
 
 # Input fields
 pressure = st.number_input("Pressure (in bar)", min_value=0.0, step=0.1)
@@ -16,23 +18,41 @@ temperature = st.number_input("Temperature (in °C)", min_value=0.0, step=0.1)
 material_metric = st.number_input("Material Transformation Metric", min_value=0.0, step=0.1)
 
 # Predict button
-if st.button("Predict Quality Rating"):
+if st.button("Compare Models"):
+    # Prepare input as in training
     x_input = np.array([[temperature * pressure, material_metric]])
 
-    # Prediction using scratch model
+    # Scratch model prediction
     poly_scratch = scratch_model['poly']
     scaler_scratch = scratch_model['scaler']
     w = scratch_model['w']
     b = scratch_model['b']
 
-    x_poly_scratch = poly_scratch.transform(x_input)
-    x_scaled_scratch = scaler_scratch.transform(x_poly_scratch)
-    pred_scratch = np.dot(x_scaled_scratch, w) + b
+    x_scaled_scratch = scaler_scratch.transform(x_input)
+    x_poly_scratch = poly_scratch.transform(x_scaled_scratch)
+    pred_scratch = np.dot(x_poly_scratch, w) + b
 
-    # Prediction using sklearn model
+    # Sklearn model prediction
     pred_sklearn = sklearn_model.predict(x_input)
 
-    # Display results
-    st.subheader("Predicted Quality Ratings")
-    st.write(f"🔧 From Scratch Model: **{pred_scratch[0]:.2f}**")
-    st.write(f"🤖 Scikit-learn Model: **{pred_sklearn[0]:.2f}**")
+    # Prepare comparison dataframe
+    df_compare = pd.DataFrame({
+        "Model": ["From Scratch", "Scikit-learn"],
+        "Predicted Quality Rating": [pred_scratch[0], pred_sklearn[0]]
+    })
+    df_compare["Predicted Quality Rating"] = df_compare["Predicted Quality Rating"].round(2)
+
+    # Show table
+    st.subheader("📊 Prediction Comparison")
+    st.table(df_compare)
+
+    # Show difference
+    diff = abs(pred_scratch[0] - pred_sklearn[0])
+    st.write(f"🧮 Absolute Difference: **{diff:.2f}**")
+
+    # Optional: Plotting bar chart
+    fig, ax = plt.subplots()
+    ax.bar(df_compare["Model"], df_compare["Predicted Quality Rating"], color=["#3498db", "#2ecc71"])
+    ax.set_ylabel("Quality Rating")
+    ax.set_title("Model Prediction Comparison")
+    st.pyplot(fig)
