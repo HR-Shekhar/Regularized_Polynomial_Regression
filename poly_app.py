@@ -1,46 +1,38 @@
 import streamlit as st
 import numpy as np
-from joblib import load
+import joblib
 
 # Load models
-ridge_model = load("PolyFromScratch.pkl")   # from-scratch model
-sklearn_model = load("PolySklearn.pkl")     # sklearn pipeline
-
-# Prediction function for from-scratch model
-def predict_scratch(X, model):
-    X_scaled = model["scaler"].transform(X)
-    w = model["w"]
-    b = model["b"]
-    return np.dot(X_scaled, w) + b
+scratch_model = joblib.load("PolyFromScratch.pkl")
+sklearn_model = joblib.load("PolySklearn.pkl")
 
 # Streamlit UI
-st.set_page_config(page_title="Quality Rating Predictor", layout="centered")
+st.title("Poly Regression Quality Predictor")
+st.markdown("Enter manufacturing conditions to predict quality rating.")
 
-st.title("🔧 Quality Rating Prediction: Polynomial Ridge Regression")
+# Input fields
+pressure = st.number_input("Pressure (in bar)", min_value=0.0, step=0.1)
+temperature = st.number_input("Temperature (in °C)", min_value=0.0, step=0.1)
+material_metric = st.number_input("Material Transformation Metric", min_value=0.0, step=0.1)
 
-st.markdown("""
-Compare two models trained on:
-- 🧠 **Custom implementation** (from scratch)
-- 🤖 **Scikit-learn Ridge regression**
-""")
-
-# Inputs
-temp = st.number_input("🌡️ Temperature (°C)", value=200.0, step=0.1)
-pressure = st.number_input("⏱️ Pressure (kPa)", value=8.0, step=0.01)
-
+# Predict button
 if st.button("Predict Quality Rating"):
-    # Derived features
-    temp_x_pressure = temp * pressure
-    mat_trans = temp_x_pressure ** 2
+    x_input = np.array([[temperature * pressure, material_metric]])
 
-    # Create input for prediction
-    X_input = np.array([[temp_x_pressure, mat_trans]])
+    # Prediction using scratch model
+    poly_scratch = scratch_model['poly']
+    scaler_scratch = scratch_model['scaler']
+    w = scratch_model['w']
+    b = scratch_model['b']
 
-    # Predict
-    pred_scratch = predict_scratch(X_input, ridge_model)
-    pred_sklearn = sklearn_model.predict(X_input)[0]
+    x_poly_scratch = poly_scratch.transform(x_input)
+    x_scaled_scratch = scaler_scratch.transform(x_poly_scratch)
+    pred_scratch = np.dot(x_scaled_scratch, w) + b
 
-    # Output
-    st.subheader("📈 Predictions")
-    st.success(f"🧠 From-Scratch Model: **{pred_scratch:.4f}**")
-    st.success(f"🤖 Scikit-learn Model: **{pred_sklearn:.4f}**")
+    # Prediction using sklearn model
+    pred_sklearn = sklearn_model.predict(x_input)
+
+    # Display results
+    st.subheader("Predicted Quality Ratings")
+    st.write(f"🔧 From Scratch Model: **{pred_scratch[0]:.2f}**")
+    st.write(f"🤖 Scikit-learn Model: **{pred_sklearn[0]:.2f}**")
