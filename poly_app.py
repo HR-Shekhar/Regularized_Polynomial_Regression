@@ -10,12 +10,12 @@ sklearn_model = joblib.load("PolySklearn.pkl")
 
 # Streamlit UI
 st.title("🧪 Model Comparison: Scratch vs Scikit-learn")
-st.markdown("Compare predictions from a manually built polynomial regression model and a scikit-learn model.")
+st.markdown("Compare predictions from a manually built polynomial regression model and a scikit-learn model.\n This model predicts the product quality on the basis of features like Temperature, Pressure and Material Transformation Metrics")
 
 # Input fields
 pressure = st.number_input("Pressure (in bar)", min_value=0.0, step=0.1)
 temperature = st.number_input("Temperature (in °C)", min_value=0.0, step=0.1)
-material_metric = st.number_input("Material Transformation Metric (t^3 - p^2)", min_value=0.0, step=0.1)
+material_metric = st.number_input("Material Transformation Metrics", min_value=0.0, step=0.1)
 
 # Predict button
 if st.button("Compare Models"):
