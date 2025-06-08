@@ -3,10 +3,10 @@ import numpy as np
 import pickle
 
 # Load both models
-with open("poly_ridge_scratch.pkl", "rb") as f:
+with open("PolyFromScratch.pkl", "rb") as f:
     weights = pickle.load(f)
 
-with open("poly_ridge_sklearn.pkl", "rb") as f:
+with open("PolySklearn.pkl", "rb") as f:
     sklearn_model = pickle.load(f)
 
 # Scratch model prediction function
