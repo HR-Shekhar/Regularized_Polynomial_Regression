@@ -13,17 +13,16 @@ st.title("🧪 Model Comparison: Scratch vs Scikit-learn")
 st.markdown("Compare predictions from a manually built polynomial regression model and a scikit-learn model.")
 
 # Input fields
-pressure = st.number_input("Pressure (in bar)", min_value=0.0, step=0.1)
-temperature = st.number_input("Temperature (in °C)", min_value=0.0, step=0.1)
+tempXpress = st.number_input("Temperature x Pressure", min_value=0.0, step=0.1)
 material_metric = st.number_input("Material Transformation Metric", min_value=0.0, step=0.1)
 
 # Predict button
 if st.button("Compare Models"):
     # Original input for sklearn model
-    x_raw = np.array([[temperature, pressure, material_metric]])
+    x_raw = np.array([[tempXpress, material_metric]])
 
     # Scratch model input (manually computed feature)
-    x_scratch_input = np.array([[temperature * pressure, material_metric]])
+    x_scratch_input = np.array([[tempXpress, material_metric]])
     poly_scratch = scratch_model['poly']
     scaler_scratch = scratch_model['scaler']
     w = scratch_model['w']
