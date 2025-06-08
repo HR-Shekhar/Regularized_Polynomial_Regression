@@ -3,8 +3,8 @@ import numpy as np
 from joblib import load
 
 # Load models
-ridge_model = load("PolyFromScratch.joblib")   # from-scratch model
-sklearn_model = load("PolySklearn.joblib")     # sklearn pipeline
+ridge_model = load("PolyFromScratch.pkl")   # from-scratch model
+sklearn_model = load("PolySklearn.pkl")     # sklearn pipeline
 
 # Prediction function for from-scratch model
 def predict_scratch(X, model):
