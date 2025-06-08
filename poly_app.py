@@ -33,7 +33,7 @@ if st.button("Compare Models"):
     pred_scratch = np.dot(x_poly_scratch, w) + b
 
     # Sklearn model prediction
-    pred_sklearn = sklearn_model.predict(x_raw)
+    pred_sklearn = sklearn_model.predict(x_poly_scratch)
 
     # Prepare comparison dataframe
     df_compare = pd.DataFrame({
